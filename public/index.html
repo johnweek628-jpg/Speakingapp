@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IELTS Speaking Practice — Jasurbek's IELTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0B1C3D;
+    --navy-mid: #112347;
+    --navy-light: #1A3060;
+    --gold: #C9A84C;
+    --gold-dim: #8a6f2e;
+    --cream: #F5F0E8;
+    --cream-dim: #ddd5c4;
+    --slate: #8A9BB5;
+    --slate-light: #b4c2d6;
+    --error: #e05555;
+    --success: #4caf7d;
+  }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    background: rgba(11,28,61,0.95);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon {
+    width: 36px; height: 36px;
+    border: 2px solid var(--gold); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; color: var(--gold); font-weight: 700;
+  }
+  .brand-text { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--cream); font-weight: 600; }
+  .brand-text span { color: var(--gold); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  #session-timer { font-size: 13px; color: var(--slate-light); font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
+  #session-timer.active { color: var(--gold); }
+
+  /* ── LOCK SCREEN ── */
+  #lock-screen {
+    flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;
+  }
+  .lock-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 16px; padding: 40px;
+    max-width: 400px; width: 100%; text-align: center;
+  }
+  .lock-card .lock-icon { font-size: 48px; margin-bottom: 16px; }
+  .lock-card h2 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--cream); margin-bottom: 8px; }
+  .lock-card p { font-size: 14px; color: var(--slate-light); margin-bottom: 28px; line-height: 1.6; }
+  .code-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+  .code-digit {
+    width: 56px; height: 64px; border-radius: 10px;
+    background: var(--navy); border: 2px solid rgba(201,168,76,0.3);
+    color: var(--cream); font-size: 28px; font-weight: 700;
+    text-align: center; font-family: 'Inter', sans-serif;
+    outline: none; transition: border-color 0.2s; caret-color: var(--gold);
+  }
+  .code-digit:focus { border-color: var(--gold); }
+  .lock-error { font-size: 13px; color: var(--error); margin-bottom: 16px; min-height: 18px; }
+  .btn-gold {
+    width: 100%; padding: 13px;
+    background: var(--gold); color: var(--navy);
+    border: none; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-gold:hover { opacity: 0.88; }
+
+  /* ── PART SELECTION ── */
+  #part-select-screen {
+    flex: 1; display: none; flex-direction: column; padding: 40px 20px;
+    align-items: center;
+  }
+  .part-select-header {
+    text-align: center; margin-bottom: 40px;
+  }
+  .part-select-header h2 { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--cream); margin-bottom: 8px; }
+  .part-select-header p { color: var(--slate-light); font-size: 15px; }
+
+  .part-cards {
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 900px; width: 100%;
+  }
+  .part-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 16px; padding: 32px 28px;
+    cursor: pointer; transition: all 0.25s;
+    flex: 1; min-width: 240px; max-width: 280px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .part-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--gold); opacity: 0; transition: opacity 0.2s;
+  }
+  .part-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+  .part-card:hover::before { opacity: 1; }
+  .part-card-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(201,168,76,0.12); border: 2px solid rgba(201,168,76,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+    color: var(--gold); margin: 0 auto 16px;
+  }
+  .part-card h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--cream); margin-bottom: 8px; }
+  .part-card p { font-size: 13px; color: var(--slate-light); line-height: 1.6; margin-bottom: 16px; }
+  .part-card-meta { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+  /* ── Q MANAGER MODAL ── */
+  #q-manager {
+    display: none; position: fixed; inset: 0;
+    background: rgba(11,28,61,0.92); z-index: 300;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  #q-manager.open { display: flex; }
+  .q-manager-card {
+    background: var(--navy-mid); border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 16px; padding: 32px;
+    max-width: 560px; width: 100%; max-height: 82vh;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .q-manager-header { display: flex; align-items: center; justify-content: space-between; }
+  .q-manager-header h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--cream); }
+  .btn-close-qm {
+    background: none; border: 1px solid rgba(138,155,181,0.3); color: var(--slate);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .btn-close-qm:hover { border-color: var(--error); color: var(--error); }
+  .q-list {
+    flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+    min-height: 80px; padding-right: 4px;
+  }
+  .q-list::-webkit-scrollbar { width: 4px; }
+  .q-list::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 4px; }
+  .q-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--navy); border: 1px solid rgba(201,168,76,0.1);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .q-item-text { flex: 1; font-size: 13px; color: var(--cream); line-height: 1.5; }
+  .q-item-del {
+    background: none; border: none; color: var(--slate); cursor: pointer;
+    font-size: 16px; padding: 0; flex-shrink: 0; transition: color 0.2s; line-height: 1;
+  }
+  .q-item-del:hover { color: var(--error); }
+  .q-add-row { display: flex; gap: 8px; }
+  .q-input {
+    flex: 1; padding: 10px 14px;
+    background: var(--navy); border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px; color: var(--cream); font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+  }
+  .q-input:focus { border-color: var(--gold); }
+  .q-input::placeholder { color: var(--slate); }
+  .btn-add-q {
+    padding: 10px 18px;
+    background: var(--gold); color: var(--navy);
+    border: none; border-radius: 8px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+  }
+  .btn-add-q:hover { opacity: 0.88; }
+  .q-empty { font-size: 13px; color: var(--slate); text-align: center; padding: 20px 0; font-style: italic; }
+  .btn-start-part {
+    padding: 13px; background: var(--gold); color: var(--navy);
+    border: none; border-radius: 8px; font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-start-part:hover { opacity: 0.88; }
+
+  /* ── APP SCREEN ── */
+  #app-screen { flex: 1; display: none; flex-direction: column; }
+  .app-body {
+    flex: 1; display: grid; grid-template-columns: 1fr 340px;
+    gap: 0; height: calc(100vh - 61px);
+  }
+
+  /* BREADCRUMB */
+  .breadcrumb-bar {
+    padding: 10px 24px; background: var(--navy-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+    display: flex; align-items: center; gap: 10px;
+    grid-column: 1 / -1;
+  }
+  .breadcrumb-bar button {
+    background: none; border: none; color: var(--gold); font-size: 12px;
+    cursor: pointer; font-family: 'Inter', sans-serif; padding: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .breadcrumb-bar .sep { color: var(--slate); font-size: 12px; }
+  .breadcrumb-bar .current { font-size: 12px; color: var(--slate-light); font-weight: 600; }
+
+  /* CHAT */
+  .chat-panel { display: flex; flex-direction: column; border-right: 1px solid rgba(201,168,76,0.12); }
+  .topic-bar {
+    padding: 14px 24px; background: var(--navy-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .topic-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-weight: 600; }
+  #topic-display { font-size: 13px; color: var(--slate-light); flex: 1; }
+  .btn-new-topic {
+    font-size: 12px; color: var(--gold);
+    background: none; border: 1px solid rgba(201,168,76,0.3);
+    padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .btn-new-topic:hover { background: rgba(201,168,76,0.1); }
+
+  #chat-messages {
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;
+  }
+  #chat-messages::-webkit-scrollbar { width: 4px; }
+  #chat-messages::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 4px; }
+
+  .msg { display: flex; gap: 10px; max-width: 85%; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg.ai   { align-self: flex-start; }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .msg.ai   .msg-avatar { background: var(--gold); color: var(--navy); }
+  .msg.user .msg-avatar { background: var(--navy-light); color: var(--slate-light); }
+  .msg-bubble { padding: 11px 15px; border-radius: 12px; font-size: 14px; line-height: 1.6; color: var(--cream); }
+  .msg.ai   .msg-bubble { background: var(--navy-mid); border: 1px solid rgba(201,168,76,0.12); border-radius: 4px 12px 12px 12px; }
+  .msg.user .msg-bubble { background: var(--navy-light); border-radius: 12px 4px 12px 12px; }
+  .msg-time { font-size: 10px; color: var(--slate); margin-top: 4px; text-align: right; }
+  .msg.ai .msg-time { text-align: left; }
+
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dots span { width: 6px; height: 6px; background: var(--slate); border-radius: 50%; animation: dot-bounce 1.2s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+  /* MIC AREA */
+  .mic-area {
+    padding: 20px 24px; background: var(--navy-mid);
+    border-top: 1px solid rgba(201,168,76,0.12);
+  }
+  .waveform-container { height: 40px; display: flex; align-items: center; gap: 3px; justify-content: center; margin-bottom: 14px; }
+  .waveform-bar { width: 3px; background: var(--navy-light); border-radius: 3px; transition: height 0.1s ease; height: 4px; }
+  .waveform-bar.active { background: var(--gold); animation: wave-anim var(--dur, 0.8s) ease-in-out infinite alternate; }
+  .waveform-bar.ai-speaking { background: var(--slate-light); animation: wave-anim var(--dur, 0.8s) ease-in-out infinite alternate; }
+  @keyframes wave-anim { from { height: 4px; } to { height: var(--peak, 28px); } }
+
+  .mic-controls { display: flex; align-items: center; gap: 12px; justify-content: center; }
+  #transcript-preview { flex: 1; font-size: 13px; color: var(--slate-light); min-height: 20px; font-style: italic; }
+  #transcript-preview.has-text { color: var(--cream); font-style: normal; }
+
+  #mic-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--gold); background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0; color: var(--gold);
+  }
+  #mic-btn:hover { background: rgba(201,168,76,0.1); }
+  #mic-btn.recording {
+    background: var(--gold); color: var(--navy); border-color: var(--gold);
+    box-shadow: 0 0 0 6px rgba(201,168,76,0.2);
+  }
+  #mic-btn svg { width: 22px; height: 22px; }
+  .mic-hint { text-align: center; font-size: 11px; color: var(--slate); margin-top: 8px; }
+
+  /* RIGHT PANEL */
+  .stats-panel { display: flex; flex-direction: column; overflow-y: auto; background: var(--navy-mid); }
+  .stats-panel::-webkit-scrollbar { width: 4px; }
+  .stats-panel::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 4px; }
+  .panel-section { padding: 20px; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .panel-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold); font-weight: 600; margin-bottom: 14px; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-box { background: var(--navy); border: 1px solid rgba(201,168,76,0.12); border-radius: 8px; padding: 12px; }
+  .stat-val { font-size: 22px; font-weight: 600; color: var(--cream); font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 10px; color: var(--slate); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  #mistakes-list { display: flex; flex-direction: column; gap: 8px; min-height: 40px; }
+  .mistake-item { background: var(--navy); border-left: 3px solid var(--error); border-radius: 0 6px 6px 0; padding: 8px 10px; animation: fadeUp 0.3s ease; }
+  .mistake-item.vocab { border-left-color: #e0a055; }
+  .mistake-type { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate); font-weight: 600; margin-bottom: 3px; }
+  .mistake-item.vocab .mistake-type { color: #e0a055; }
+  .mistake-item.grammar .mistake-type { color: var(--error); }
+  .mistake-wrong { font-size: 12px; color: var(--cream); }
+  .mistake-wrong s { color: var(--slate); text-decoration: line-through; }
+  .mistake-right { font-size: 12px; color: var(--success); margin-top: 2px; }
+  .no-mistakes { font-size: 13px; color: var(--slate); text-align: center; padding: 12px 0; font-style: italic; }
+
+  #end-session-btn {
+    margin: 20px 20px; width: calc(100% - 40px); padding: 13px;
+    background: var(--gold); border: none;
+    color: var(--navy); font-weight: 600; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s;
+  }
+  #end-session-btn:hover { opacity: 0.88; }
+  #end-session-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* EMPTY STATE */
+  .empty-chat { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 24px; color: var(--slate); }
+  .empty-chat-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-chat h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--cream); margin-bottom: 8px; }
+  .empty-chat p { font-size: 13px; line-height: 1.6; max-width: 280px; }
+
+  /* SUMMARY MODAL */
+  #summary-modal { display: none; position: fixed; inset: 0; background: rgba(11,28,61,0.92); z-index: 200; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+  #summary-modal.open { display: flex; }
+  .summary-card { background: var(--navy-mid); border: 1px solid rgba(201,168,76,0.3); border-radius: 16px; padding: 36px; max-width: 600px; width: 100%; max-height: 88vh; overflow-y: auto; }
+  .summary-card h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--cream); margin-bottom: 6px; }
+  .summary-card .sub { font-size: 13px; color: var(--slate); margin-bottom: 24px; }
+  .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .summary-stat { background: var(--navy); border-radius: 8px; padding: 14px; text-align: center; border: 1px solid rgba(201,168,76,0.12); }
+  .summary-stat .val { font-size: 24px; font-weight: 700; color: var(--gold); }
+  .summary-stat .lbl { font-size: 10px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+  /* BAND SCORE SECTION */
+  .band-section { margin-bottom: 24px; }
+  .band-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 14px; }
+  .band-overall {
+    text-align: center; background: var(--navy); border: 2px solid var(--gold);
+    border-radius: 12px; padding: 20px; margin-bottom: 14px;
+  }
+  .band-overall .band-num { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: var(--gold); line-height: 1; }
+  .band-overall .band-lbl { font-size: 12px; color: var(--slate-light); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .band-criteria { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .band-crit-box { background: var(--navy); border: 1px solid rgba(201,168,76,0.12); border-radius: 8px; padding: 10px 12px; }
+  .band-crit-name { font-size: 10px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .band-crit-score { font-size: 22px; font-weight: 700; color: var(--cream); }
+  .band-crit-score span { font-size: 12px; color: var(--slate); font-weight: 400; }
+  .band-feedback { background: var(--navy); border-radius: 8px; padding: 14px; border: 1px solid rgba(201,168,76,0.1); }
+  .band-feedback p { font-size: 13px; color: var(--cream); line-height: 1.7; white-space: pre-wrap; }
+  .analyzing-band { text-align: center; padding: 20px; color: var(--slate-light); font-size: 13px; }
+  .analyzing-band .dots { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
+  .analyzing-band .dots span { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; animation: dot-bounce 1.2s infinite; }
+  .analyzing-band .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .analyzing-band .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  .summary-mistakes { margin-bottom: 24px; }
+  .summary-mistakes h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 12px; }
+  .summary-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-gold-solid {
+    flex: 1; padding: 13px; background: var(--gold); color: var(--navy);
+    border: none; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-gold-solid:hover { opacity: 0.88; }
+  .btn-outline-sm {
+    padding: 13px 20px; background: transparent; color: var(--slate-light);
+    border: 1px solid rgba(138,155,181,0.3); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-outline-sm:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* VOICE TOGGLE */
+  #voice-toggle {
+    display: flex; align-items: center; gap: 7px;
+    background: none; border: 1px solid rgba(201,168,76,0.3);
+    color: var(--slate-light); border-radius: 20px; padding: 6px 13px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; transition: all 0.2s;
+  }
+  #voice-toggle:hover { border-color: var(--gold); color: var(--gold); }
+  #voice-toggle.on { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.08); }
+  #voice-toggle .v-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--slate); transition: background 0.2s; }
+  #voice-toggle.on .v-dot { background: var(--gold); }
+
+  @media (max-width: 768px) {
+    .app-body { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .stats-panel { max-height: 320px; }
+    .part-cards { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">J</div>
+    <div class="brand-text"><span>IELTS</span> Speaking Practice</div>
+  </div>
+  <div class="header-right">
+    <button id="voice-toggle" onclick="toggleVoice()" title="Toggle examiner voice" style="display:none">
+      <span class="v-dot"></span>
+      <span id="voice-label">Voice off</span>
+    </button>
+    <div id="session-timer">00:00</div>
+  </div>
+</header>
+
+<div id="lock-screen">
+  <div class="lock-card">
+    <div class="lock-icon">🔐</div>
+    <h2>Enter Access Code</h2>
+    <p>Enter your 4-digit code to access IELTS Speaking Practice.</p>
+    <div class="code-inputs">
+      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d0" />
+      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2" />
+      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3" />
+    </div>
+    <div class="lock-error" id="lock-error"></div>
+    <button class="btn-gold" onclick="submitCode()">Unlock</button>
+  </div>
+</div>
+
+<div id="part-select-screen">
+  <div class="part-select-header">
+    <h2>Choose a Part</h2>
+    <p>Select which section of the IELTS Speaking exam to practise</p>
+  </div>
+  <div class="part-cards">
+    <div class="part-card" onclick="openPartManager(1)">
+      <div class="part-card-num">1</div>
+      <h3>Part 1</h3>
+      <p>Short questions on familiar topics — home, family, work, hobbies and interests.</p>
+      <div class="part-card-meta">4–5 minutes · Q&amp;A format</div>
+    </div>
+    <div class="part-card" onclick="openPartManager(2)">
+      <div class="part-card-num">2</div>
+      <h3>Part 2</h3>
+      <p>Individual long-turn speaking. Describe a topic using a cue card for 1–2 minutes.</p>
+      <div class="part-card-meta">3–4 minutes · Monologue</div>
+    </div>
+    <div class="part-card" onclick="openPartManager(3)">
+      <div class="part-card-num">3</div>
+      <h3>Part 3</h3>
+      <p>Two-way discussion on abstract ideas related to the Part 2 topic.</p>
+      <div class="part-card-meta">4–5 minutes · Discussion</div>
+    </div>
+  </div>
+</div>
+
+<div id="q-manager">
+  <div class="q-manager-card">
+    <div class="q-manager-header">
+      <h3 id="qm-title">Manage Questions</h3>
+      <button class="btn-close-qm" onclick="closeQManager()">✕</button>
+    </div>
+    <div class="q-list" id="qm-list"></div>
+    <div class="q-add-row">
+      <input class="q-input" id="qm-input" placeholder="Type a question or topic and press Add…" onkeydown="if(event.key==='Enter')addQItem()" />
+      <button class="btn-add-q" onclick="addQItem()">Add</button>
+    </div>
+    <button class="btn-start-part" onclick="startPartSession()">▶ Start Practice</button>
+  </div>
+</div>
+
+<div id="app-screen">
+  <div class="breadcrumb-bar">
+    <button onclick="goToPartSelect()">← Parts</button>
+    <span class="sep">/</span>
+    <span class="current" id="breadcrumb-part">Part 1</span>
+  </div>
+  <div class="app-body">
+    <div class="chat-panel">
+      <div class="topic-bar">
+        <span class="topic-label" id="topic-part-label">Part 1</span>
+        <span id="topic-display">Press "Next question" to begin</span>
+        <button class="btn-new-topic" onclick="nextQuestion()">Next question</button>
+      </div>
+
+      <div id="chat-messages">
+        <div class="empty-chat" id="empty-state">
+          <div class="empty-chat-icon">🎙️</div>
+          <h3>Ready when you are</h3>
+          <p>Press "Next question" above to get your prompt, then tap the mic to speak.</p>
+        </div>
+      </div>
+
+      <div class="mic-area">
+        <div class="waveform-container" id="waveform"></div>
+        <div class="mic-controls">
+          <div id="transcript-preview">Tap mic to start recording…</div>
+          <button id="mic-btn" onclick="toggleRecording()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        </div>
+        <div class="mic-hint" id="mic-hint">Tap mic to start · tap again to stop &amp; send</div>
+      </div>
+    </div>
+
+    <div class="stats-panel">
+      <div class="panel-section">
+        <div class="panel-section-title">Session Stats</div>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="stat-val" id="stat-turns">0</div><div class="stat-label">Responses</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-words">0</div><div class="stat-label">Words spoken</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-grammar">0</div><div class="stat-label">Grammar issues</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-vocab">0</div><div class="stat-label">Vocab issues</div></div>
+        </div>
+      </div>
+      <div class="panel-section" style="flex:1">
+        <div class="panel-section-title">Mistakes Found</div>
+        <div id="mistakes-list"><div class="no-mistakes">Mistakes will be populated instantly at the end of the session to preserve free quota.</div></div>
+      </div>
+      <button id="end-session-btn" onclick="endSession()" disabled>End session &amp; see summary</button>
+    </div>
+  </div>
+</div>
+
+<div id="summary-modal">
+  <div class="summary-card">
+    <h2>Session Complete</h2>
+    <div class="sub" id="summary-sub"></div>
+    <div class="summary-stats">
+      <div class="summary-stat"><div class="val" id="sum-time">0:00</div><div class="lbl">Duration</div></div>
+      <div class="summary-stat"><div class="val" id="sum-turns">0</div><div class="lbl">Responses</div></div>
+      <div class="summary-stat"><div class="val" id="sum-words">0</div><div class="lbl">Words</div></div>
+    </div>
+
+    <div class="band-section">
+      <h3>Band Score Estimate</h3>
+      <div id="band-result">
+        <div class="analyzing-band">Analysing your performance… <span class="dots"><span></span><span></span><span></span></span></div>
+      </div>
+    </div>
+
+    <div class="summary-mistakes">
+      <h3>All mistakes this session</h3>
+      <div id="summary-mistakes-list"></div>
+    </div>
+
+    <div class="summary-actions">
+      <button class="btn-gold-solid" onclick="newSession()">Start new session</button>
+      <button class="btn-outline-sm" onclick="goToPartSelect(); document.getElementById('summary-modal').classList.remove('open')">Change part</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────
+const tg = window.Telegram?.WebApp;
+if (tg) tg.ready();
+const ACCESS_CODE = '0108';
+const LS_UNLOCKED = 'ielts_unlocked_session';
+const LS_PART1_QS = 'ielts_part1_questions';
+const LS_PART2_QS = 'ielts_part2_topics';
+const LS_PART3_QS = 'ielts_part3_questions';
+
+// Default questions/topics
+const DEFAULT_P1 = [
+  "Let's talk about your hometown. Where are you from and what do you like most about it?",
+  "Do you work or are you a student? Tell me about what you do.",
+  "How do you usually spend your free time?",
+  "Do you enjoy cooking? Why or why not?",
+  "What kind of music do you like? Has this changed over the years?",
+  "Do you prefer mornings or evenings? Why?",
+  "Tell me about your favourite season and why you enjoy it.",
+  "How important is sport in your daily life?",
+  "Do you use social media a lot? What for?",
+  "What did you enjoy doing as a child that you still enjoy now?"
+];
+const DEFAULT_P2 = [
+  "Describe a place you visited that made a strong impression on you. You should say: where it was, when you went, what you did there, and explain why it made such a strong impression.",
+  "Describe a skill you would like to learn. You should say: what the skill is, how you would learn it, how long it would take, and explain why you want to learn it.",
+  "Describe a person who has influenced you greatly. You should say: who this person is, how you know them, what they have done, and explain how they have influenced you.",
+  "Describe a time when you had to work as part of a team. You should say: what the task was, who was in the team, what your role was, and explain whether the team worked well together.",
+  "Describe a piece of technology you find very useful. You should say: what it is, how often you use it, how you use it, and explain why you find it so useful.",
+  "Describe a festival or celebration important in your culture. You should say: what it is, when it takes place, how people celebrate it, and explain why it is important.",
+];
+const DEFAULT_P3 = [
+  "Some people think that cities are becoming too crowded. What do you think are the main causes of urbanisation?",
+  "How has technology changed the way people communicate with each other?",
+  "Do you think it is important for young people to learn a foreign language? Why?",
+  "What are the advantages and disadvantages of working from home?",
+  "How do you think education will change in the next 20 years?",
+  "Is it better for children to grow up in the city or in the countryside? Why?",
+  "What impact does social media have on modern society?",
+  "Do you think governments should do more to protect the environment? Why?",
+];
+
+// ── STATE ──────────────────────────────────────────────────────
+let currentPart = 1;
+let conversationHistory = [];
+let allTurnsText = []; 
+let mistakes = [];
+let sessionActive = false;
+let timerInterval = null;
+let sessionSeconds = 0;
+let totalWords = 0;
+let turnCount = 0;
+let recognition = null;
+let isRecording = false;
+let pendingTranscript = '';
+let voiceEnabled = false;
+let ttsVoice = null;
+let micPermissionGranted = false;
+let globalMicStream = null; 
+let partQuestions = { 1: [], 2: [], 3: [] };
+let questionIndex = 0;
+
+// ── INIT ───────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadQuestionsFromStorage();
+  checkSession();
+  setupCodeInputs();
+  buildWaveform();
+  requestMicPermission();
+});
+
+function loadQuestionsFromStorage() {
+  const p1 = localStorage.getItem(LS_PART1_QS);
+  const p2 = localStorage.getItem(LS_PART2_QS);
+  const p3 = localStorage.getItem(LS_PART3_QS);
+  partQuestions[1] = p1 ? JSON.parse(p1) : [...DEFAULT_P1];
+  partQuestions[2] = p2 ? JSON.parse(p2) : [...DEFAULT_P2];
+  partQuestions[3] = p3 ? JSON.parse(p3) : [...DEFAULT_P3];
+}
+
+function saveQuestions(part) {
+  const keys = { 1: LS_PART1_QS, 2: LS_PART2_QS, 3: LS_PART3_QS };
+  localStorage.setItem(keys[part], JSON.stringify(partQuestions[part]));
+}
+
+// ── SESSION PERSISTENCE ────────────────────────────────────────
+function checkSession() {
+  const ok = sessionStorage.getItem(LS_UNLOCKED);
+  if (ok === '1') {
+    showPartSelect();
+  }
+}
+
+function setupCodeInputs() {
+  const digits = document.querySelectorAll('.code-digit');
+  digits.forEach((d, i) => {
+    d.addEventListener('input', () => {
+      d.value = d.value.replace(/\D/g, '').slice(-1);
+      if (d.value && i < digits.length - 1) digits[i + 1].focus();
+      if (i === digits.length - 1 && d.value) submitCode();
+    });
+    d.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
+      if (e.key === 'Enter') submitCode();
+    });
+  });
+  digits[0].focus();
+}
+
+function submitCode() {
+  const code = Array.from(document.querySelectorAll('.code-digit')).map(d => d.value).join('');
+  if (code === ACCESS_CODE) {
+    sessionStorage.setItem(LS_UNLOCKED, '1');
+    document.getElementById('lock-error').textContent = '';
+    showPartSelect();
+  } else {
+    document.getElementById('lock-error').textContent = 'Incorrect code. Please try again.';
+    document.querySelectorAll('.code-digit').forEach(d => { d.value = ''; });
+    document.getElementById('d0').focus();
+  }
+}
+
+// ── SCREEN TRANSITIONS ─────────────────────────────────────────
+function showPartSelect() {
+  document.getElementById('lock-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('part-select-screen').style.display = 'flex';
+  document.getElementById('voice-toggle').style.display = 'none';
+}
+
+function goToPartSelect() {
+  stopTimer();
+  sessionActive = false;
+  showPartSelect();
+}
+
+function showAppScreen() {
+  document.getElementById('part-select-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
+  document.getElementById('voice-toggle').style.display = 'flex';
+}
+
+// ── Q MANAGER ─────────────────────────────────────────────────
+let qmPart = 1;
+function openPartManager(part) {
+  qmPart = part;
+  document.getElementById('qm-title').textContent = part === 2 ? `Part 2 – Topics` : `Part ${part} – Questions`;
+  document.getElementById('qm-input').placeholder = part === 2
+    ? 'Type a cue card topic and press Add…'
+    : 'Type a question and press Add…';
+  renderQList();
+  document.getElementById('q-manager').classList.add('open');
+}
+
+function closeQManager() {
+  document.getElementById('q-manager').classList.remove('open');
+  document.getElementById('qm-input').value = '';
+}
+
+function renderQList() {
+  const list = document.getElementById('qm-list');
+  const qs = partQuestions[qmPart];
+  if (!qs.length) {
+    list.innerHTML = '<div class="q-empty">No items yet. Add one below.</div>';
+    return;
+  }
+  list.innerHTML = qs.map((q, i) => `
+    <div class="q-item">
+      <div class="q-item-text">${escHtml(q)}</div>
+      <button class="q-item-del" onclick="deleteQ(${i})" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+function addQItem() {
+  const input = document.getElementById('qm-input');
+  const val = input.value.trim();
+  if (!val) return;
+  partQuestions[qmPart].push(val);
+  saveQuestions(qmPart);
+  input.value = '';
+  renderQList();
+}
+
+function deleteQ(idx) {
+  partQuestions[qmPart].splice(idx, 1);
+  saveQuestions(qmPart);
+  renderQList();
+}
+
+function startPartSession() {
+  currentPart = qmPart;
+  closeQManager();
+  document.getElementById('breadcrumb-part').textContent = `Part ${currentPart}`;
+  document.getElementById('topic-part-label').textContent = `Part ${currentPart}`;
+  questionIndex = 0;
+  conversationHistory = [];
+  allTurnsText = [];
+  mistakes = [];
+  totalWords = 0;
+  turnCount = 0;
+  sessionSeconds = 0;
+  sessionActive = false;
+  pendingTranscript = '';
+  document.getElementById('session-timer').textContent = '00:00';
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="empty-chat" id="empty-state">
+      <div class="empty-chat-icon">🎙️</div>
+      <h3>Part ${currentPart} — Ready</h3>
+      <p>Press "Next question" above to get your ${currentPart === 2 ? 'topic' : 'question'}, then tap the mic to speak.</p>
+    </div>`;
+  document.getElementById('topic-display').textContent = `Press "Next question" to begin`;
+  document.getElementById('mistakes-list').innerHTML = '<div class="no-mistakes">Mistakes will be populated instantly at the end of the session to preserve free quota.</div>';
+  document.getElementById('end-session-btn').disabled = true;
+  updateStats();
+  showAppScreen();
+  if (!recognition) initSpeechRecognition();
+}
+
+// ── MIC PERMISSION ─────────────────────────────────
+async function requestMicPermission() {
+  try {
+    globalMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micPermissionGranted = true;
+    if (!recognition) initSpeechRecognition();
+  } catch (err) {
+    document.getElementById('mic-hint').textContent = 'Microphone access denied. Please allow mic in browser settings.';
+  }
+}
+
+// ── QUESTIONS ─────────────────────────────────────────────────
+function nextQuestion() {
+  const qs = partQuestions[currentPart];
+  if (!qs.length) {
+    alert('No questions saved for this part. Go back and add some.');
+    return;
+  }
+  const q = qs[questionIndex % qs.length];
+  questionIndex++;
+  document.getElementById('topic-display').textContent = q;
+
+  if (!sessionActive) {
+    sessionActive = true;
+    startTimer();
+    document.getElementById('end-session-btn').disabled = false;
+  }
+
+  const systemPrompt = buildSystemPrompt(currentPart, q);
+  conversationHistory = [{ role: 'user', content: systemPrompt }];
+
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  callClaude(null, true);
+}
+
+function buildSystemPrompt(part, question) {
+  if (part === 1) {
+    return `You are a professional, friendly IELTS Speaking examiner conducting Part 1. The question is: "${question}". 
+    
+    Start with a brief natural opening (under 2 sentences) and ask the question. After the student answers, ask one natural follow-up question. Keep it conversational and professional. Never correct mistakes during the conversation.`;
+  } else if (part === 2) {
+    return `You are a professional IELTS Speaking examiner conducting Part 2. The cue card topic is: "${question}". 
+
+    Introduce the topic briefly (say you'd like them to speak about it for 1-2 minutes and they can take a moment to think), then let them speak. After their response, ask 1-2 brief rounding-off questions. Be professional and encouraging. Never correct mistakes.`;
+  } else {
+    return `You are a professional IELTS Speaking examiner conducting Part 3 — the two-way discussion. The discussion question is: "${question}".
+
+    Introduce it naturally, engage in a real two-way academic discussion. Push for deeper answers with follow-up probes like "Why do you think that?" or "Can you elaborate on that?". Never correct mistakes during the conversation. Be professional and intellectually engaged.`;
+  }
+}
+
+async function fetchWithRetry(url, options, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const resp = await fetch(url, options);
+      if (resp.ok) return resp;
+      let err = {};
+      try { err = await resp.json(); } catch(e) {}
+      const msg = err?.error?.message || '';
+      if (msg.toLowerCase().includes('high demand') && i < retries - 1) {
+        await new Promise(r => setTimeout(r, 2000));
+        continue;
+      }
+      return { ok: false, json: async () => err };
+    } catch (netErr) {
+      if (i === retries - 1) throw netErr;
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+}
+
+// ── GEMINI API ────────────────────────────────────────────────
+async function callClaude(userText, isOpening = false) {
+  if (!isOpening && userText) {
+    conversationHistory.push({ role: 'user', content: userText });
+    appendMessage('user', userText);
+    allTurnsText.push(userText);
+  }
+
+  const typingId = showTyping();
+
+  try {
+    const systemInstruction = `You are a warm, professional IELTS Speaking examiner. Keep responses concise (1-4 sentences). Never provide grammar or vocabulary corrections during the session. Stay in examiner role throughout.`;
+
+    const rawMessages = isOpening
+      ? [{ role: 'user', content: conversationHistory[0].content }]
+      : conversationHistory.map((m, i) => {
+          if (i === 0) return { role: 'user', content: m.content };
+          return m;
+        });
+
+    const contents = rawMessages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const body = {
+      system_instruction: { parts: [{ text: systemInstruction }] },
+      contents,
+      generationConfig: { maxOutputTokens: 1000 }
+    };
+
+    // Swapped model to stable gemini-2.5-flash for consistent free tier architecture limits
+    const resp = await fetchWithRetry(
+  `/api/gemini`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'gemini-2.5-flash', body })
+  }
+);
+
+    removeTyping(typingId);
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      appendMessage('ai', `⚠️ API error: ${err.error?.message || 'Unknown error.'}`);
+      return;
+    }
+
+    const data = await resp.json();
+    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+
+    conversationHistory.push({ role: 'assistant', content: aiText });
+    appendMessage('ai', aiText);
+    speakText(aiText);
+
+  } catch (e) {
+    removeTyping(typingId);
+    appendMessage('ai', `⚠️ Network error: ${e.message}`);
+  }
+}
+
+// ── BAND SCORE & MISTAKE EVALUATION (BUNDLED CALL) ──────────────────────────
+const BAND_DESCRIPTORS = `
+IELTS Speaking Band Descriptors (Official British Council):
+Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation.
+`;
+
+async function getEvaluationsAndBandScore() {
+  if (!allTurnsText.length) return;
+
+  const combined = allTurnsText.join('\n\n');
+
+  try {
+    const body = {
+      system_instruction: {
+        parts: [{ text: `You are an expert IELTS examiner. Analyze the student's text, extract grammar/vocabulary flaws, and calculate highly realistic band scores based on official criteria.` }]
+      },
+      contents: [{
+        role: 'user',
+        parts: [{ text: `Evaluate this performance from IELTS Part ${currentPart}.
+        
+Student Responses:
+"""
+${combined}
+"""
+
+Return ONLY a single valid JSON object with this precise scheme (do not include markdown ticks or structural preamble):
+{
+  "overall": 6.5,
+  "fluency": 7.0,
+  "lexical": 6.0,
+  "grammar": 6.5,
+  "pronunciation": 6.5,
+  "feedback": "Your targeted evaluation review notes here.",
+  "mistakes": [
+    {"type": "grammar", "wrong": "text containing error", "right": "corrected phrasing", "note": "explanation"},
+    {"type": "vocab", "wrong": "poor text choice", "right": "stronger academic word choice", "note": "explanation"}
+  ]
+}` }]
+      }],
+      generationConfig: { maxOutputTokens: 1500 }
+    };
+
+    const resp = await fetchWithRetry(
+  `/api/gemini`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'gemini-2.5-flash', body })
+  }
+);
+
+    const data = await resp.json();
+    let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    raw = raw.replace(/```json|```/g, '').trim();
+    
+    const result = JSON.parse(raw);
+    
+    // Save extracted structural payload to global arrays
+    mistakes = result.mistakes || [];
+    
+    renderBandScore(result);
+    renderMistakes(mistakes);
+    updateStats();
+    
+    // Update dashboard overview view
+    const smList = document.getElementById('summary-mistakes-list');
+    smList.innerHTML = !mistakes.length
+      ? '<div class="no-mistakes">No mistakes recorded this session.</div>'
+      : mistakes.map(m => `
+          <div class="mistake-item ${m.type}" style="margin-bottom:8px">
+            <div class="mistake-type">${m.type === 'grammar' ? '🔴 Grammar' : '🟠 Vocabulary'}</div>
+            <div class="mistake-wrong"><s>${escHtml(m.wrong)}</s></div>
+            <div class="mistake-right">✓ ${escHtml(m.right)}</div>
+          </div>`).join('');
+
+  } catch (e) {
+    document.getElementById('band-result').innerHTML = `<div class="band-feedback"><p style="color:var(--slate)">Could not complete assessment tracking details: ${e.message}</p></div>`;
+  }
+}
+
+function renderBandScore(r) {
+  const formatScore = s => Number(s).toFixed(1);
+  document.getElementById('band-result').innerHTML = `
+    <div class="band-overall">
+      <div class="band-num">${formatScore(r.overall)}</div>
+      <div class="band-lbl">Overall Estimated Band</div>
+    </div>
+    <div class="band-criteria">
+      <div class="band-crit-box">
+        <div class="band-crit-name">Fluency &amp; Coherence</div>
+        <div class="band-crit-score">${formatScore(r.fluency)} <span>/ 9</span></div>
+      </div>
+      <div class="band-crit-box">
+        <div class="band-crit-name">Lexical Resource</div>
+        <div class="band-crit-score">${formatScore(r.lexical)} <span>/ 9</span></div>
+      </div>
+      <div class="band-crit-box">
+        <div class="band-crit-name">Grammatical Range &amp; Accuracy</div>
+        <div class="band-crit-score">${formatScore(r.grammar)} <span>/ 9</span></div>
+      </div>
+      <div class="band-crit-box">
+        <div class="band-crit-name">Pronunciation</div>
+        <div class="band-crit-score">${formatScore(r.pronunciation)} <span>/ 9</span></div>
+      </div>
+    </div>
+    <div class="band-feedback"><p>${escHtml(r.feedback || '')}</p></div>
+  `;
+}
+
+function renderMistakes(list) {
+  const el = document.getElementById('mistakes-list');
+  if (!list.length) { el.innerHTML = '<div class="no-mistakes">No mistakes found — great job!</div>'; return; }
+  el.innerHTML = list.map(m => `
+    <div class="mistake-item ${m.type}">
+      <div class="mistake-type">${m.type === 'grammar' ? '🔴 Grammar' : '🟠 Vocabulary'}</div>
+      <div class="mistake-wrong"><s>${escHtml(m.wrong)}</s></div>
+      <div class="mistake-right">✓ ${escHtml(m.right)}</div>
+    </div>
+  `).join('');
+}
+
+// ── CHAT UI ───────────────────────────────────────────────────
+function appendMessage(role, text) {
+  const el = document.getElementById('empty-state');
+  if (el) el.remove();
+  const msgs = document.getElementById('chat-messages');
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'ai' ? 'E' : 'You'}</div>
+    <div>
+      <div class="msg-bubble">${escHtml(text)}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'typing-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = id;
+  div.innerHTML = `<div class="msg-avatar">E</div><div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+function removeTyping(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+// ── STATS ─────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-turns').textContent = turnCount;
+  document.getElementById('stat-words').textContent = totalWords;
+  document.getElementById('stat-grammar').textContent = mistakes.filter(m => m.type === 'grammar').length;
+  document.getElementById('stat-vocab').textContent = mistakes.filter(m => m.type === 'vocab').length;
+}
+
+// ── SESSION END ───────────────────────────────────────────────
+function endSession() {
+  stopTimer();
+  sessionActive = false;
+
+  const m = String(Math.floor(sessionSeconds / 60)).padStart(2, '0');
+  const s = String(sessionSeconds % 60).padStart(2, '0');
+  document.getElementById('sum-time').textContent = m + ':' + s;
+  document.getElementById('sum-turns').textContent = turnCount;
+  document.getElementById('sum-words').textContent = totalWords;
+  document.getElementById('summary-sub').textContent =
+    `Part ${currentPart} · ${new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+
+  document.getElementById('summary-modal').classList.add('open');
+  
+  // Triggers one unified response structure configuration profile metrics call
+  getEvaluationsAndBandScore();
+}
+
+function newSession() {
+  document.getElementById('summary-modal').classList.remove('open');
+  conversationHistory = [];
+  allTurnsText = [];
+  mistakes = [];
+  totalWords = 0;
+  turnCount = 0;
+  sessionSeconds = 0;
+  sessionActive = false;
+  pendingTranscript = '';
+  questionIndex = 0;
+  document.getElementById('session-timer').textContent = '00:00';
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="empty-chat" id="empty-state">
+      <div class="empty-chat-icon">🎙️</div>
+      <h3>Part ${currentPart} — Ready</h3>
+      <p>Press "Next question" to begin.</p>
+    </div>`;
+  document.getElementById('topic-display').textContent = `Press "Next question" to begin`;
+  document.getElementById('mistakes-list').innerHTML = '<div class="no-mistakes">Mistakes will be populated instantly at the end of the session to preserve free quota.</div>';
+  document.getElementById('end-session-btn').disabled = true;
+  updateStats();
+}
+
+function escHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── TIMER ─────────────────────────────────────────────────────
+function startTimer() {
+  sessionSeconds = 0;
+  const el = document.getElementById('session-timer');
+  el.classList.add('active');
+  timerInterval = setInterval(() => {
+    sessionSeconds++;
+    const m = String(Math.floor(sessionSeconds / 60)).padStart(2, '0');
+    const s = String(sessionSeconds % 60).padStart(2, '0');
+    el.textContent = m + ':' + s;
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('session-timer').classList.remove('active');
+}
+
+// ── SPEECH RECOGNITION ────────────────────────────────────────
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.getElementById('mic-hint').textContent = 'Speech recognition not supported. Use Chrome.';
+    document.getElementById('mic-btn').disabled = true;
+    return;
+  }
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (final) pendingTranscript += final + ' ';
+    const preview = document.getElementById('transcript-preview');
+    preview.textContent = (pendingTranscript + interim).trim() || 'Listening…';
+    preview.classList.toggle('has-text', !!(pendingTranscript + interim).trim());
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'not-allowed') {
+      document.getElementById('mic-hint').textContent = 'Mic access denied. Please allow in browser settings.';
+    } else if (e.error !== 'no-speech') {
+      console.warn('Speech error:', e.error);
+    }
+  };
+
+  recognition.onend = () => {
+    if (isRecording) {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+}
+
+function toggleRecording() {
+  if (!sessionActive) {
+    alert('Press "Next question" first to start a session.');
+    return;
+  }
+  if (!recognition) return;
+
+  if (!isRecording) {
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.waveform-bar').forEach(b => b.classList.remove('ai-speaking'));
+    isRecording = true;
+    pendingTranscript = '';
+    document.getElementById('transcript-preview').textContent = 'Listening…';
+    document.getElementById('transcript-preview').classList.remove('has-text');
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('mic-hint').textContent = 'Tap mic again to stop & send';
+    activateWaveform(true);
+    try { recognition.start(); } catch(e) {}
+  } else {
+    isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-hint').textContent = 'Tap mic to start · tap again to stop & send';
+    activateWaveform(false);
+    try { recognition.stop(); } catch(e) {}
+
+    setTimeout(() => {
+      const text = pendingTranscript.trim();
+      if (text) {
+        pendingTranscript = '';
+        document.getElementById('transcript-preview').textContent = 'Tap mic to start recording…';
+        document.getElementById('transcript-preview').classList.remove('has-text');
+        const words = text.split(/\s+/).filter(Boolean).length;
+        totalWords += words;
+        turnCount++;
+        updateStats();
+        callClaude(text);
+      } else {
+        document.getElementById('transcript-preview').textContent = 'Nothing detected. Try again.';
+      }
+    }, 400);
+  }
+}
+
+// ── WAVEFORM ──────────────────────────────────────────────────
+function buildWaveform() {
+  const c = document.getElementById('waveform');
+  if (!c) return;
+  c.innerHTML = '';
+  for (let i = 0; i < 28; i++) {
+    const b = document.createElement('div');
+    b.className = 'waveform-bar';
+    const dur = (0.5 + Math.random() * 0.7).toFixed(2);
+    const peak = (8 + Math.random() * 24).toFixed(0);
+    b.style.setProperty('--dur', dur + 's');
+    b.style.setProperty('--peak', peak + 'px');
+    b.style.animationDelay = (Math.random() * 0.5).toFixed(2) + 's';
+    c.appendChild(b);
+  }
+}
+
+function activateWaveform(on) {
+  document.querySelectorAll('.waveform-bar').forEach(b => {
+    if (on) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}
+
+// ── TTS ───────────────────────────────────────────────────────
+function loadVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  ttsVoice = voices.find(v => v.name.includes('Google UK English Female'))
+    || voices.find(v => v.lang === 'en-GB' && v.name.toLowerCase().includes('female'))
+    || voices.find(v => v.lang === 'en-GB')
+    || voices.find(v => v.lang.startsWith('en-') && !v.name.toLowerCase().includes('male'))
+    || voices.find(v => v.lang.startsWith('en')) || null;
+}
+window.speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  const btn = document.getElementById('voice-toggle');
+  const lbl = document.getElementById('voice-label');
+  btn.classList.toggle('on', voiceEnabled);
+  lbl.textContent = voiceEnabled ? 'Voice on' : 'Voice off';
+  if (voiceEnabled) {
+    loadVoices();
+    const test = new SpeechSynthesisUtterance('');
+    window.speechSynthesis.speak(test);
+  } else {
+    window.speechSynthesis.cancel();
+    activateWaveform(false);
+  }
+}
+
+function speakText(text) {
+  if (!voiceEnabled) return;
+  window.speechSynthesis.cancel();
+  const clean = text.replace(/[*_`#]/g, '').trim();
+  const utter = new SpeechSynthesisUtterance(clean);
+  utter.lang = 'en-GB'; utter.rate = 0.92; utter.pitch = 1.05;
+  if (ttsVoice) utter.voice = ttsVoice;
+  utter.onstart = () => document.querySelectorAll('.waveform-bar').forEach(b => { b.classList.remove('active'); b.classList.add('ai-speaking'); });
+  utter.onend = () => document.querySelectorAll('.waveform-bar').forEach(b => b.classList.remove('ai-speaking'));
+  utter.onerror = () => document.querySelectorAll('.waveform-bar').forEach(b => b.classList.remove('ai-speaking'));
+  window.speechSynthesis.speak(utter);
+}
+</script>
+</body>
+</html>
