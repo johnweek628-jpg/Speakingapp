@@ -809,7 +809,7 @@ async function callClaude(userText, isOpening = false) {
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gemini-2.5-flash', body })
+    body: JSON.stringify({ model: 'gemini-2.5-flash-lite', body })
   }
 );
 
@@ -881,7 +881,7 @@ Return ONLY a single valid JSON object with this precise scheme (do not include 
   {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'gemini-2.5-flash', body })
+    body: JSON.stringify({ model: 'gemini-2.5-flash-lite', body })
   }
 );
 
