@@ -889,7 +889,7 @@ Return ONLY a single valid JSON object with this precise scheme (do not include 
     let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     raw = raw.replace(/```json|```/g, '').trim();
     
-    const result = JSON.parse(raw);
+const result = JSON.parse(raw.replace(/```json|```/g, '').trim());
     
     // Save extracted structural payload to global arrays
     mistakes = result.mistakes || [];
