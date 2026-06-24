@@ -58,36 +58,7 @@
   #session-timer.active { color: var(--gold); }
 
   /* ── LOCK SCREEN ── */
-  #lock-screen {
-    flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;
-  }
-  .lock-card {
-    background: var(--navy-mid);
-    border: 1px solid rgba(201,168,76,0.25);
-    border-radius: 16px; padding: 40px;
-    max-width: 400px; width: 100%; text-align: center;
-  }
-  .lock-card .lock-icon { font-size: 48px; margin-bottom: 16px; }
-  .lock-card h2 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--cream); margin-bottom: 8px; }
-  .lock-card p { font-size: 14px; color: var(--slate-light); margin-bottom: 28px; line-height: 1.6; }
-  .code-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
-  .code-digit {
-    width: 56px; height: 64px; border-radius: 10px;
-    background: var(--navy); border: 2px solid rgba(201,168,76,0.3);
-    color: var(--cream); font-size: 28px; font-weight: 700;
-    text-align: center; font-family: 'Inter', sans-serif;
-    outline: none; transition: border-color 0.2s; caret-color: var(--gold);
-  }
-  .code-digit:focus { border-color: var(--gold); }
-  .lock-error { font-size: 13px; color: var(--error); margin-bottom: 16px; min-height: 18px; }
-  .btn-gold {
-    width: 100%; padding: 13px;
-    background: var(--gold); color: var(--navy);
-    border: none; border-radius: 8px;
-    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
-    cursor: pointer; transition: opacity 0.2s;
-  }
-  .btn-gold:hover { opacity: 0.88; }
+
 
   /* ── PART SELECTION ── */
   #part-select-screen {
@@ -413,20 +384,7 @@
   </div>
 </header>
 
-<div id="lock-screen">
-  <div class="lock-card">
-    <div class="lock-icon">🔐</div>
-    <h2>Enter Access Code</h2>
-    <p>Enter your 4-digit code to access IELTS Speaking Practice.</p>
-    <div class="code-inputs">
-      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d0" />
-      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2" />
-      <input class="code-digit" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3" />
-    </div>
-    <div class="lock-error" id="lock-error"></div>
-    <button class="btn-gold" onclick="submitCode()">Unlock</button>
-  </div>
-</div>
+
 
 <div id="part-select-screen">
   <div class="part-select-header">
@@ -561,8 +519,6 @@
 // ── CONSTANTS ──────────────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
 if (tg) tg.ready();
-const ACCESS_CODE = '0108';
-const LS_UNLOCKED = 'ielts_unlocked_session';
 const LS_PART1_QS = 'ielts_part1_questions';
 const LS_PART2_QS = 'ielts_part2_topics';
 const LS_PART3_QS = 'ielts_part3_questions';
@@ -622,10 +578,9 @@ let questionIndex = 0;
 // ── INIT ───────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadQuestionsFromStorage();
-  checkSession();
-  setupCodeInputs();
   buildWaveform();
   requestMicPermission();
+  showPartSelect();
 });
 
 function loadQuestionsFromStorage() {
@@ -643,45 +598,14 @@ function saveQuestions(part) {
 }
 
 // ── SESSION PERSISTENCE ────────────────────────────────────────
-function checkSession() {
-  const ok = sessionStorage.getItem(LS_UNLOCKED);
-  if (ok === '1') {
-    showPartSelect();
-  }
-}
 
-function setupCodeInputs() {
-  const digits = document.querySelectorAll('.code-digit');
-  digits.forEach((d, i) => {
-    d.addEventListener('input', () => {
-      d.value = d.value.replace(/\D/g, '').slice(-1);
-      if (d.value && i < digits.length - 1) digits[i + 1].focus();
-      if (i === digits.length - 1 && d.value) submitCode();
-    });
-    d.addEventListener('keydown', e => {
-      if (e.key === 'Backspace' && !d.value && i > 0) digits[i - 1].focus();
-      if (e.key === 'Enter') submitCode();
-    });
-  });
-  digits[0].focus();
-}
 
-function submitCode() {
-  const code = Array.from(document.querySelectorAll('.code-digit')).map(d => d.value).join('');
-  if (code === ACCESS_CODE) {
-    sessionStorage.setItem(LS_UNLOCKED, '1');
-    document.getElementById('lock-error').textContent = '';
-    showPartSelect();
-  } else {
-    document.getElementById('lock-error').textContent = 'Incorrect code. Please try again.';
-    document.querySelectorAll('.code-digit').forEach(d => { d.value = ''; });
-    document.getElementById('d0').focus();
-  }
-}
+
+
 
 // ── SCREEN TRANSITIONS ─────────────────────────────────────────
 function showPartSelect() {
-  document.getElementById('lock-screen').style.display = 'none';
+
   document.getElementById('app-screen').style.display = 'none';
   document.getElementById('part-select-screen').style.display = 'flex';
   document.getElementById('voice-toggle').style.display = 'none';
